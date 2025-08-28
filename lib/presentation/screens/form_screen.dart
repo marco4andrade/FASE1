@@ -92,7 +92,6 @@ class _FormScreenState extends State<FormScreen> {
                 controller: _descController,
                 decoration: const InputDecoration(labelText: 'Descripción'),
                 validator: (v) => v == null || v.isEmpty ? 'Ingrese una descripción' : null,
-                maxLines: 3,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(

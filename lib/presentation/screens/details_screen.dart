@@ -92,8 +92,8 @@ class DetailsScreen extends StatelessWidget {
                                   child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
                                   onPressed: () {
                                     context.read<ItemBloc>().add(DeleteItemEvent(item.id));
-                                    Navigator.pop(context); // Cierra diálogo
-                                    Navigator.pop(context, true); // Vuelve y refresca
+                                    Navigator.pop(context); 
+                                    Navigator.pop(context, true);
                                   },
                                 ),
                               ],
