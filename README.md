@@ -143,15 +143,6 @@ flutter build ios --release
 flutter build web --release
 ```
 
-### Testing
-```bash
-# Ejecutar todas las pruebas
-flutter test
-
-# Ejecutar pruebas con coverage
-flutter test --coverage
-```
-
 ## 📝 Consideraciones Importantes
 
 ### Almacenamiento de Datos
@@ -170,13 +161,6 @@ flutter test --coverage
 - Manejo de errores de navegación con pantalla de error personalizada
 - Navegación type-safe con validación de argumentos
 
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una branch para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la branch (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
 
 ## 📄 Licencia
 
