@@ -1,42 +1,42 @@
-import '../entities/item.dart';
+import '../entities/item_entity.dart';
 import '../repositories/item_repository.dart';
 
-class GetItems {
+/// Centraliza todas las operaciones de negocio relacionadas con [Item].
+/// 
+/// Encapsula toda la lógica de negocio relacionada con los elementos. Actúa como un punto
+/// único de entrada para todas las operaciones que la capa de presentación
+/// puede realizar sobre los elementos.
+/// 
+/// Beneficios:
+/// - Centralización de lógica de negocio
+/// - Fácil mantenimiento y testing
+/// - Desacoplamiento entre presentación y datos
+/// - Reutilización de código
+/// 
+
+class ItemUsecases {
+  /// Repositorio utilizado para operaciones de persistencia
   final ItemRepository repository;
 
-  GetItems(this.repository);
+  ItemUsecases(this.repository);
 
-  Future<List<Item>> call() async {
+  Future<List<Item>> getItems() async {
     return await repository.getItems();
   }
-}
-
-class AddItem {
-  final ItemRepository repository;
-
-  AddItem(this.repository);
-
-  Future<void> call(Item item) async {
+ 
+  Future<void> addItem(Item item) async {
     await repository.addItem(item);
   }
-}
 
-class UpdateItem {
-  final ItemRepository repository;
-
-  UpdateItem(this.repository);
-
-  Future<void> call(Item item) async {
+  Future<void> updateItem(Item item) async {
     await repository.updateItem(item);
   }
-}
 
-class DeleteItem {
-  final ItemRepository repository;
-
-  DeleteItem(this.repository);
-
-  Future<void> call(String id) async {
+  Future<void> deleteItem(String id) async {
     await repository.deleteItem(id);
+  }
+
+  Future<Item?> getItemById(String id) async {
+    return await repository.getItemById(id);
   }
 }

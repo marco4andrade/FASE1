@@ -1,128 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/item_usecases.dart';
+import '../../domain/entities/item_entity.dart';
 import '../bloc/item_bloc.dart';
-import 'form_screen.dart';
-import 'details_screen.dart';
-import 'dart:io';
+import '../widgets/item_card.dart';
+import '../../core/routes/app_routes.dart';
 
 class HomeScreen extends StatelessWidget {
-  final GetItems getItems;
-  final AddItem addItem;
-  final UpdateItem updateItem;
-  final DeleteItem deleteItem;
+  final ItemUsecases itemUsecases;
 
   const HomeScreen({
     super.key,
-    required this.getItems,
-    required this.addItem,
-    required this.updateItem,
-    required this.deleteItem,
+    required this.itemUsecases,
   });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => ItemBloc(
-        getItems: getItems,
-        addItem: addItem,
-        updateItem: updateItem,
-        deleteItem: deleteItem,
+        itemUsecases: itemUsecases,
       )..add(LoadItemsEvent()),
-      child: const _HomeScreenBody(),
-    );
-  }
-}
-
-class _HomeScreenBody extends StatelessWidget {
-  const _HomeScreenBody();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Listado de Elementos')),
-      body: BlocConsumer<ItemBloc, ItemState>(
-        listener: (context, state) {
-          if (state is ItemError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          }
-          if (state is ItemCreated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Elemento agregado')),
-            );
-          }
-          if (state is ItemUpdated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Elemento actualizado')),
-            );
-          }
-          if (state is ItemDeleted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Elemento eliminado')),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is ItemLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is ItemLoaded) {
-            if (state.items.isEmpty) {
-              return const Center(child: Text('No hay elementos.'));
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Listado de Elementos')),
+        body: BlocConsumer<ItemBloc, ItemState>(
+          listener: (context, state) {
+            if (state is ItemError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
             }
-            return ListView.builder(
-              itemCount: state.items.length,
-              itemBuilder: (context, index) {
-                final item = state.items[index];
-                return Card(
-                  child: ListTile(
-                    leading: item.imagePath != null
-                        ? Image.file(
-                            File(item.imagePath!),
-                            width: 56,
-                            height: 56,
-                            fit: BoxFit.cover,
-                          )
-                        : const Icon(Icons.image, size: 40),
-                    title: Text(item.title),
-                    subtitle: Text(item.description),
+            if (state is ItemCreated) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Elemento agregado')),
+              );
+            }
+            if (state is ItemUpdated) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Elemento actualizado')),
+              );
+            }
+            if (state is ItemDeleted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Elemento eliminado')),
+              );
+            }
+          },
+          builder: (context, state) {
+            // Inicializar ItemBloc al comienzo del build para evitar warnings del linter
+            final itemBloc = context.read<ItemBloc>();
+            
+            if (state is ItemLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is ItemLoaded) {
+              if (state.items.isEmpty) {
+                return const Center(child: Text('No hay elementos.'));
+              }
+              return ListView.builder(
+                itemCount: state.items.length,
+                itemBuilder: (context, index) {
+                  final item = state.items[index];
+                  return ItemCard(
+                    item: item,
                     onTap: () async {
-                      final refresh = await Navigator.push(
+                      final refresh = await Navigator.pushNamed(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider.value(
-                            value: context.read<ItemBloc>(),
-                            child: DetailsScreen(item: item),
-                          ),
-                        ),
+                        AppRoutes.details,
+                        arguments: item,
                       );
                       if (refresh == true) {
-                        context.read<ItemBloc>().add(LoadItemsEvent());
+                        itemBloc.add(LoadItemsEvent());
                       }
                     },
-                  ),
+                  );
+                },
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+        floatingActionButton: Builder(
+          builder: (context) {
+            // Inicializar ItemBloc para el FloatingActionButton
+            final itemBloc = context.read<ItemBloc>();
+            
+            return FloatingActionButton(
+              onPressed: () async {
+                final newItem = await Navigator.pushNamed(
+                  context,
+                  AppRoutes.addItem,
                 );
+                if (newItem != null && newItem is Item) {
+                  itemBloc.add(AddItemEvent(newItem));
+                }
               },
+              child: const Icon(Icons.add),
             );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final newItem = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const FormScreen(),
-            ),
-          );
-          if (newItem != null) {
-            context.read<ItemBloc>().add(AddItemEvent(newItem));
-          }
-        },
-        child: const Icon(Icons.add),
+          },
+        ),
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/item.dart';
+import '../../domain/entities/item_entity.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -23,7 +23,7 @@ class _FormScreenState extends State<FormScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.item?.title ?? '');
     _descController = TextEditingController(text: widget.item?.description ?? '');
-    if (widget.item?.imagePath != null) {
+    if (widget.item?.imagePath != null && !widget.item!.imagePath!.startsWith('assets/')) {
       _imageFile = File(widget.item!.imagePath!);
     }
   }
@@ -41,6 +41,20 @@ class _FormScreenState extends State<FormScreen> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
+    }
+  }
+
+  Widget _buildImage() {
+    if (_imageFile != null) {
+      return Image.file(_imageFile!, height: 200);
+    } else if (widget.item?.imagePath != null) {
+      if (widget.item!.imagePath!.startsWith('assets/')) {
+        return Image.asset(widget.item!.imagePath!, height: 200);
+      } else {
+        return Image.file(File(widget.item!.imagePath!), height: 200);
+      }
+    } else {
+      return const Icon(Icons.image, size: 100, color: Colors.grey);
     }
   }
 
@@ -69,11 +83,7 @@ class _FormScreenState extends State<FormScreen> {
           child: ListView(
             children: [
               Center(
-                child: _imageFile != null
-                    ? Image.file(_imageFile!, height: 200)
-                    : widget.item?.imagePath != null
-                        ? Image.file(File(widget.item!.imagePath!), height: 200)
-                        : const Icon(Icons.image, size: 100, color: Colors.grey),
+                child: _buildImage(),
               ),
               const SizedBox(height: 8),
               ElevatedButton.icon(
@@ -85,13 +95,13 @@ class _FormScreenState extends State<FormScreen> {
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(labelText: 'Título'),
-                validator: (v) => v == null || v.isEmpty ? 'Ingrese un título' : null,
+                validator: (titleValue) => titleValue == null || titleValue.isEmpty ? 'Ingrese un título' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descController,
                 decoration: const InputDecoration(labelText: 'Descripción'),
-                validator: (v) => v == null || v.isEmpty ? 'Ingrese una descripción' : null,
+                validator: (descriptionValue) => descriptionValue == null || descriptionValue.isEmpty ? 'Ingrese una descripción' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
